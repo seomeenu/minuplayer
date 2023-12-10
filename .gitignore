@@ -1,2 +1,3 @@
-/nice.mid
-/output.mp4
+*.mid
+*.mp4
+res/
