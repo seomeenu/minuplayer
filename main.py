@@ -16,8 +16,11 @@ clock = pygame.time.Clock()
 
 dt = 1
 
+# first = bottom, last = top
 midis = [
-    "nice.mid"
+    "saltchord.mid",
+    "saltbass.mid",
+    "saltmel.mid"
 ]
 
 midi_datas = [pretty_midi.PrettyMIDI(i) for i in midis]
@@ -25,23 +28,8 @@ midi_datas = [pretty_midi.PrettyMIDI(i) for i in midis]
 #pallete : https://lospec.com/palette-list/autumn-glow
 colors = [
     "#ffd8a9",
-    "#ffb366",
-    "#ff5b4f",
     "#f2af92",
     "#f39d91",
-    "#d38e84",
-    "#c37289",
-    "#ad82cf",
-    "#8455a9",
-    "#794d81",
-    "#4a3778",
-    "#a9548a",
-    "#814d6e",
-    "#c92e70",
-    "#9e2081",
-    "#7e9770",
-    "#5d7668",
-    "#235a63",
 ]
 
 layer_count = len(midis)
@@ -65,7 +53,7 @@ for i, midi_data in enumerate(midi_datas):
                 note_highest = note.pitch
             all_notes.append([note, i])
 
-song_length += 1 # <- 1s
+song_length += 2 # <- 1s
 
 note_margin = 2
 
