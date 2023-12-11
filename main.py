@@ -122,7 +122,7 @@ else:
     fps = 30
     for frame in range(int(fps*song_length)):
         try:
-            screen.fill("#533a44")
+            screen.fill(bg_color)
             play_time = frame/fps-1
 
             for note, i in all_notes:
@@ -134,7 +134,7 @@ else:
                         a = ease_out((play_time-note.start)/pulse_length)*pulse_strength
                     pygame.draw.rect(screen, colors[i], [note_x, (note_count-note.pitch+note_lowest)*note_h-a/2, note_length*zoom, note_h/note_slim+a])
                         
-            pygame.draw.line(screen, "#ffffe1", [bar_x, 0], [bar_x, screen_height], 4)
+            pygame.draw.line(screen, bar_color, [bar_x, 0], [bar_x, screen_height], 4)
 
             draw_text(screen, title, 70, 70, font=fontb)
             draw_text(screen, desc, 70, 140)
