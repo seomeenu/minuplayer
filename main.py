@@ -85,32 +85,36 @@ def draw_text(screen, text, x, y, color=bar_color, font=font):
 title = "random thing"
 desc = "minu"
 
+def draw():
+    screen.fill(bg_color)
+    for note, i in all_notes:
+        note_x = (note.start-play_time)*zoom+bar_x
+        note_length = note.end-note.start
+        if screen_width > note_x and note_x+note_length*zoom > 0:
+            a = 0
+            if note_x < bar_x:
+                a = ease_out((play_time-note.start)/pulse_length)*pulse_strength
+            pygame.draw.rect(screen, colors[i], [note_x, (note_count-note.pitch+note_lowest)*note_h-a/2, note_length*zoom, note_h/note_slim+a])
+                
+    pygame.draw.line(screen, bar_color, [bar_x, 0], [bar_x, screen_height], 4)
+    
+    draw_text(screen, title, 70, 70, font=fontb)
+    draw_text(screen, desc, 70, 140)
+
 preview = False
 if preview:
     screen = pygame.display.set_mode((screen_width, screen_height))
     while True:
-        screen.fill(bg_color)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
         play_time = (pygame.time.get_ticks()-start_time)/1000
-        for note, i in all_notes:
-            note_x = (note.start-play_time)*zoom+bar_x
-            note_length = note.end-note.start
-            if screen_width > note_x and note_x+note_length*zoom > 0:
-                a = 0
-                if note_x < bar_x:
-                    a = ease_out((play_time-note.start)/pulse_length)*pulse_strength
-                pygame.draw.rect(screen, colors[i], [note_x, (note_count-note.pitch+note_lowest)*note_h-a/2, note_length*zoom, note_h/note_slim+a])
-                    
-        pygame.draw.line(screen, bar_color, [bar_x, 0], [bar_x, screen_height], 4)
-
+        
+        draw()
+        
         dt = clock.tick(120)*60/1000
-
-        draw_text(screen, title, 70, 70, font=fontb)
-        draw_text(screen, desc, 70, 140)
 
         if play_time > song_length:
             print("end")
@@ -125,19 +129,7 @@ else:
             screen.fill(bg_color)
             play_time = frame/fps-1
 
-            for note, i in all_notes:
-                note_x = (note.start-play_time)*zoom+bar_x
-                note_length = note.end-note.start
-                if screen_width > note_x and note_x+note_length*zoom > 0:
-                    a = 0
-                    if note_x < bar_x:
-                        a = ease_out((play_time-note.start)/pulse_length)*pulse_strength
-                    pygame.draw.rect(screen, colors[i], [note_x, (note_count-note.pitch+note_lowest)*note_h-a/2, note_length*zoom, note_h/note_slim+a])
-                        
-            pygame.draw.line(screen, bar_color, [bar_x, 0], [bar_x, screen_height], 4)
-
-            draw_text(screen, title, 70, 70, font=fontb)
-            draw_text(screen, desc, 70, 140)
+            draw()
 
             pygame.image.save(screen, f"res/{frame}.png")
         except KeyboardInterrupt:
