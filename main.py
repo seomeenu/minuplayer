@@ -4,6 +4,7 @@ import pretty_midi
 import cv2
 import os
 import shutil
+import json
 
 from easing_functions import *
 
@@ -16,28 +17,48 @@ clock = pygame.time.Clock()
 
 dt = 1
 
-# first = bottom, last = top
-midis = [
-    "midis/bass.mid",
-    "midis/ep.mid",
-    "midis/drums.mid",
-    "midis/vibraphone.mid"
-]
+#configs
 
-midi_datas = [pretty_midi.PrettyMIDI(i) for i in midis]
+# first = bottom, last = top
+midis = []
 
 bg_color = "#45444f"
 bar_color = "#f2f0e5"
-colors = [
-    "#b8b5b9",
-    "#4b80ca",
-    "#68c2d3",
-    "#cf8acb"
-]
+colors = []
+
+start_delay = 1000
+note_slim = 1.5
+
+title = "title"
+desc = "desc"
+
+pulse_strength = 5
+pulse_length = 1
+
+preview = False
+
+with open("config.json") as file:
+    data = json.load(file)
+    midis = data["midis"]
+    
+    bg_color = data["bg_color"]
+    bar_color = data["bar_color"]
+    colors = data["colors"]
+    start_delay = data["start_delay"]
+    note_slim = data["note_slim"]
+    title = data["title"]
+    desc = data["desc"]
+    pulse_strength = data["pulse_strength"]
+    pulse_length = data["pulse_length"]
+    preview = data["preview"]
+    
+#configs end
+
+midi_datas = [pretty_midi.PrettyMIDI(i) for i in midis]
 
 layer_count = len(midis)
 
-start_time = pygame.time.get_ticks()+1000 # <- 1000ms delay
+start_time = pygame.time.get_ticks()+start_delay # <- 1000ms delay
 play_time = 0
 
 note_lowest = 131
@@ -63,14 +84,11 @@ note_margin = 2
 note_count = note_highest-note_lowest+note_margin
 
 note_h = screen_height/(note_count+note_margin+1)
-note_slim = 1.5
 zoom = 300
 
 bar_x = screen_width/2
 
 ease_out = ExponentialEaseOut(1, 0, 1)
-pulse_strength = 10
-pulse_length = 1
 
 if os.path.exists("res"):
     shutil.rmtree("res")
@@ -81,9 +99,6 @@ fontb = pygame.font.Font("data/Galmuri11-Bold.ttf", 48)
 def draw_text(screen, text, x, y, color=bar_color, font=font):
     render = font.render(text, False, color)
     screen.blit(render, (x, y))
-
-title = "random thing"
-desc = "minu"
 
 def draw():
     screen.fill(bg_color)
@@ -101,7 +116,6 @@ def draw():
     draw_text(screen, title, 70, 70, font=fontb)
     draw_text(screen, desc, 70, 140)
 
-preview = False
 if preview:
     screen = pygame.display.set_mode((screen_width, screen_height))
     while True:
@@ -124,6 +138,7 @@ else:
     #render
     screen = pygame.Surface((screen_width, screen_height))
     fps = 30
+    print(f"rendering | fps: {fps} | frames: {int(fps*song_length)}")
     for frame in range(int(fps*song_length)):
         try:
             screen.fill(bg_color)

@@ -1,0 +1,28 @@
+{
+    "midis": [
+        "midis/bass.mid",
+        "midis/ep.mid",
+        "midis/drums.mid",
+        "midis/vibraphone.mid"
+    ],
+    
+    "bg_color": "#45444f",
+    "bar_color": "#f2f0e5",
+    "colors": [
+        "#b8b5b9",
+        "#4b80ca",
+        "#68c2d3",
+        "#cf8acb"
+    ],
+    
+    "start_delay": 1000,
+    "note_slim": 1.5,
+    
+    "title": "random thing",
+    "desc": "minu",
+    
+    "pulse_strength": 10,
+    "pulse_length": 1,
+    
+    "preview": true
+}
