@@ -6,7 +6,8 @@
         "midis/old/arp.mid",
         "midis/old/melody.mid"
     ],
-    
+    "song_path": "X:/creations/music/320pixel.wav",
+
     "bg_color": "#45444f",
     "bar_color": "#f2f0e5",
     "colors": [
@@ -26,5 +27,6 @@
     "pulse_strength": 10,
     "pulse_length": 1,
     
+    "fps": 30,
     "preview": false
 }

@@ -5,6 +5,7 @@ import cv2
 import os
 import shutil
 import json
+import moviepy.editor as mp
 
 pygame.init()
 
@@ -33,6 +34,7 @@ desc = "desc"
 pulse_strength = 50
 pulse_length = 1
 
+fps = 30
 preview = False
 
 def color_overlay(color1, color2, alpha):
@@ -47,6 +49,7 @@ def color_overlay(color1, color2, alpha):
 with open("config.json") as file:
     data = json.load(file)
     midis = data["midis"]
+    song_path = data["song_path"]
     
     bg_color = data["bg_color"]
     bar_color = data["bar_color"]
@@ -62,9 +65,17 @@ with open("config.json") as file:
     pulse_strength = data["pulse_strength"]
     pulse_length = data["pulse_length"]
     preview = data["preview"]
+    fps = data["fps"]
     
 #configs end
 
+song_loaded = False
+if song_path != None:
+    pygame.mixer.music.load(song_path)
+    pygame.mixer.music.set_volume(0.3)
+    song_playing = False
+    song_loaded = True
+    
 midi_datas = [pretty_midi.PrettyMIDI(i) for i in midis]
 
 layer_count = len(midis)
@@ -112,7 +123,7 @@ def draw_text(screen, text, x, y, color=bar_color, font=font):
     render = font.render(text, False, color)
     screen.blit(render, (x, y))
 
-def draw():
+def draw(dt):
     screen.fill(bg_color)
     for i, notes in enumerate(all_notes.values()):
         for note_data in notes:
@@ -124,7 +135,7 @@ def draw():
                 a = 0
                 color = colors[i]
                 if note_x < bar_x:
-                    note_data[1] *= 0.9
+                    note_data[1] *= 0.75**dt
                     a = note_data[1]
                     if note_x+note_length > bar_x:
                         color = p_colors[i]
@@ -144,11 +155,13 @@ if preview:
                 sys.exit()
 
         play_time = (pygame.time.get_ticks()-start_time)/1000
-        
-        draw()
-        
-        dt = clock.tick(120)*60/1000
+        dt = clock.tick(fps)*60/1000
+        if play_time >= 0 and not song_playing and song_loaded != None:
+            song_playing = True
+            pygame.mixer.music.play()
 
+        draw(dt)
+        
         if play_time > song_length:
             print("end")
 
@@ -156,25 +169,32 @@ if preview:
 else:
     #render
     screen = pygame.Surface((screen_width, screen_height))
-    fps = 30
     print(f"rendering | fps: {fps} | frames: {int(fps*song_length)}")
     for frame in range(int(fps*song_length)):
         try:
             play_time = frame/fps-1
 
-            draw()
+            draw(1)
 
             pygame.image.save(screen, f"res/{frame}.png")
         except KeyboardInterrupt:
+            print(f"interrupted at frame {frame}")
             break
 
     print("making video")
-    video = cv2.VideoWriter(f"{title}.mp4", cv2.VideoWriter_fourcc(*"mp4v"), fps, (screen_width, screen_height))
+    video = cv2.VideoWriter(f"res/temp.mp4", cv2.VideoWriter_fourcc(*"mp4v"), fps, (screen_width, screen_height))
 
     for file in sorted(os.listdir("res"), key=len):
         image = cv2.imread(f"res/{file}")
         video.write(image)
 
-    print("video done")
     cv2.destroyAllWindows()
     video.release()
+
+    if song_loaded:
+        song_file = mp.AudioFileClip(song_path)
+        video = mp.VideoFileClip(f"res/temp.mp4")
+        final = video.set_audio(mp.CompositeAudioClip([song_file.set_start(start_delay/1000)]))
+        final.write_videofile(f"{title}.mp4", fps=fps)
+
+    print("video done") 
