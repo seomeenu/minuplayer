@@ -6,8 +6,6 @@ import os
 import shutil
 import json
 
-from easing_functions import *
-
 pygame.init()
 
 screen_width = 1280
@@ -32,10 +30,19 @@ note_slim = 1.5
 title = "title"
 desc = "desc"
 
-pulse_strength = 5
+pulse_strength = 50
 pulse_length = 1
 
 preview = False
+
+def color_overlay(color1, color2, alpha):
+    bg1 = pygame.Surface((1, 1))
+    bg1.fill(color1)
+    bg2 = pygame.Surface((1, 1))
+    bg2.fill(color2)
+    bg2.set_alpha(alpha)
+    bg1.blit(bg2, (0, 0))
+    return bg1.get_at((0, 0))
 
 with open("config.json") as file:
     data = json.load(file)
@@ -44,6 +51,10 @@ with open("config.json") as file:
     bg_color = data["bg_color"]
     bar_color = data["bar_color"]
     colors = data["colors"]
+    p_colors = []
+    for color in colors:
+        p_colors.append(color_overlay(color, "#ffffff", 50))
+
     start_delay = data["start_delay"]
     note_slim = data["note_slim"]
     title = data["title"]
@@ -64,7 +75,10 @@ play_time = 0
 note_lowest = 131
 note_highest = 0
 
-all_notes = []
+all_notes = {}
+for i in range(layer_count):
+    all_notes[i] = []
+    
 song_length = 0
 for i, midi_data in enumerate(midi_datas):
     if song_length < midi_data.get_end_time():
@@ -75,9 +89,9 @@ for i, midi_data in enumerate(midi_datas):
                 note_lowest = note.pitch
             if note_highest < note.pitch:
                 note_highest = note.pitch
-            all_notes.append([note, i])
+            all_notes[i].append([note, pulse_strength])
 
-song_length += 2 # <- 1s
+song_length += 3 # <- 3s
 
 note_margin = 2
 
@@ -87,8 +101,6 @@ note_h = screen_height/(note_count+note_margin+1)
 zoom = 300
 
 bar_x = screen_width/2
-
-ease_out = ExponentialEaseOut(1, 0, 1)
 
 if os.path.exists("res"):
     shutil.rmtree("res")
@@ -102,14 +114,21 @@ def draw_text(screen, text, x, y, color=bar_color, font=font):
 
 def draw():
     screen.fill(bg_color)
-    for note, i in all_notes:
-        note_x = (note.start-play_time)*zoom+bar_x
-        note_length = note.end-note.start
-        if screen_width > note_x and note_x+note_length*zoom > 0:
-            a = 0
-            if note_x < bar_x:
-                a = ease_out((play_time-note.start)/pulse_length)*pulse_strength
-            pygame.draw.rect(screen, colors[i], [note_x, (note_count-note.pitch+note_lowest)*note_h-a/2, note_length*zoom, note_h/note_slim+a])
+    for i, notes in enumerate(all_notes.values()):
+        for note_data in notes:
+            note = note_data[0]
+            f = (5/(i+1))
+            note_x = (note.start-play_time)*zoom/f+bar_x
+            note_length = (note.end-note.start)*zoom/f 
+            if screen_width > note_x and note_x+note_length > 0:
+                a = 0
+                color = colors[i]
+                if note_x < bar_x:
+                    note_data[1] *= 0.9
+                    a = note_data[1]
+                    if note_x+note_length > bar_x:
+                        color = p_colors[i]
+                pygame.draw.rect(screen, color, [note_x, (note_count-note.pitch+note_lowest)*note_h-a/2, note_length, note_h/note_slim+a])
                 
     pygame.draw.line(screen, bar_color, [bar_x, 0], [bar_x, screen_height], 4)
     
@@ -141,7 +160,6 @@ else:
     print(f"rendering | fps: {fps} | frames: {int(fps*song_length)}")
     for frame in range(int(fps*song_length)):
         try:
-            screen.fill(bg_color)
             play_time = frame/fps-1
 
             draw()
@@ -150,11 +168,13 @@ else:
         except KeyboardInterrupt:
             break
 
-    video = cv2.VideoWriter(f"{title}.mp4", cv2.VideoWriter_fourcc(*"XVID"), 30, (screen_width, screen_height))
+    print("making video")
+    video = cv2.VideoWriter(f"{title}.mp4", cv2.VideoWriter_fourcc(*"mp4v"), fps, (screen_width, screen_height))
 
     for file in sorted(os.listdir("res"), key=len):
         image = cv2.imread(f"res/{file}")
         video.write(image)
 
+    print("video done")
     cv2.destroyAllWindows()
     video.release()

@@ -1,15 +1,17 @@
 {
     "midis": [
-        "midis/bass.mid",
-        "midis/ep.mid",
-        "midis/drums.mid",
-        "midis/vibraphone.mid"
+        "midis/old/bass.mid",
+        "midis/old/piano.mid",
+        "midis/old/chords.mid",
+        "midis/old/arp.mid",
+        "midis/old/melody.mid"
     ],
     
     "bg_color": "#45444f",
     "bar_color": "#f2f0e5",
     "colors": [
         "#b8b5b9",
+        "#4b80ca",
         "#4b80ca",
         "#68c2d3",
         "#cf8acb"
@@ -18,11 +20,11 @@
     "start_delay": 1000,
     "note_slim": 1.5,
     
-    "title": "random thing",
+    "title": "320pixel",
     "desc": "minu",
     
     "pulse_strength": 10,
     "pulse_length": 1,
     
-    "preview": true
+    "preview": false
 }

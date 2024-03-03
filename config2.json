@@ -1,0 +1,22 @@
+{
+    "midis": [
+        "midis/old/kap.mid"
+    ],
+    
+    "bg_color": "#45444f",
+    "bar_color": "#f2f0e5",
+    "colors": [
+        "#f2f0e5"
+    ],
+    
+    "start_delay": 1000,
+    "note_slim": 1.5,
+    
+    "title": "piano thing",
+    "desc": "minu",
+    
+    "pulse_strength": 10,
+    "pulse_length": 1,
+    
+    "preview": true
+}
